@@ -42,8 +42,14 @@ func NewStockServiceAPI(spec *loads.Document) *StockServiceAPI {
 
 		JSONProducer: runtime.JSONProducer(),
 
+		GetStockHandler: GetStockHandlerFunc(func(params GetStockParams) middleware.Responder {
+			return middleware.NotImplemented("operation GetStock has not yet been implemented")
+		}),
 		GetStocksHandler: GetStocksHandlerFunc(func(params GetStocksParams) middleware.Responder {
 			return middleware.NotImplemented("operation GetStocks has not yet been implemented")
+		}),
+		PostStockHandler: PostStockHandlerFunc(func(params PostStockParams) middleware.Responder {
+			return middleware.NotImplemented("operation PostStock has not yet been implemented")
 		}),
 	}
 }
@@ -79,8 +85,12 @@ type StockServiceAPI struct {
 	//   - application/json
 	JSONProducer runtime.Producer
 
+	// GetStockHandler sets the operation handler for the get stock operation
+	GetStockHandler GetStockHandler
 	// GetStocksHandler sets the operation handler for the get stocks operation
 	GetStocksHandler GetStocksHandler
+	// PostStockHandler sets the operation handler for the post stock operation
+	PostStockHandler PostStockHandler
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
 	ServeError func(http.ResponseWriter, *http.Request, error)
@@ -157,8 +167,14 @@ func (o *StockServiceAPI) Validate() error {
 		unregistered = append(unregistered, "JSONProducer")
 	}
 
+	if o.GetStockHandler == nil {
+		unregistered = append(unregistered, "GetStockHandler")
+	}
 	if o.GetStocksHandler == nil {
 		unregistered = append(unregistered, "GetStocksHandler")
+	}
+	if o.PostStockHandler == nil {
+		unregistered = append(unregistered, "PostStockHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -251,7 +267,15 @@ func (o *StockServiceAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
+	o.handlers["GET"]["/stock"] = NewGetStock(o.context, o.GetStockHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
 	o.handlers["GET"]["/stocks"] = NewGetStocks(o.context, o.GetStocksHandler)
+	if o.handlers["POST"] == nil {
+		o.handlers["POST"] = make(map[string]http.Handler)
+	}
+	o.handlers["POST"]["/stock"] = NewPostStock(o.context, o.PostStockHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP

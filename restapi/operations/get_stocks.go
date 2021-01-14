@@ -37,7 +37,7 @@ func NewGetStocks(ctx *middleware.Context, handler GetStocksHandler) *GetStocks 
 
 /*GetStocks swagger:route GET /stocks getStocks
 
-List all watched .
+List all followed companies
 
 */
 type GetStocks struct {

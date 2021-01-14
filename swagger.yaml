@@ -13,7 +13,7 @@ produces:
 paths:
   /stocks:
     get:
-      summary: "List all watched ."
+      summary: "List all followed companies"
       produces:
         - "application/json"
       responses:
@@ -27,4 +27,83 @@ paths:
           description: "method not allowed"
         500:
           description: "Internal error."
+  /stock:
+    get:
+      summary: "get stocks"
+      produces:
+        - "application/json"
+      parameters:
+      - name: label
+        in: query
+        description: company stock label
+        type: string
+      responses:
+        200:
+          description: "ok"
+          schema:
+            $ref: "#/definitions/stock"
+        400:
+          description: "bad request"
+        404:
+          description: "company not found"
+        500:
+          description: "internal error"
+
+    post:
+      summary: "add a new company to crawler"
+      produces:
+        - "application/json"
+      parameters:
+      - name: label
+        in: body
+        required: true
+        schema:
+          $ref: "#/definitions/company"
+      responses:
+        201:
+          description: "created"
+        400:
+          description: "bad request"
+        500:
+          description: "internal error"
+definitions:
+  stockValue:
+    type: object
+    description: stock value and variation of a company
+    properties:
+      label:
+        type: string
+        description: company label
+      value:
+        type: number
+        description: value of the stock company
+      variation:
+        type: number
+        description: value of the daily variation of the stock value
+  stock:
+    type: object
+    description: list of stock values
+    properties:
+      count:
+        type: number
+      values:
+        type: array
+        items: 
+          $ref: "#/definitions/stockValue"
+
+    example:
+      count: 2
+      values:
+        [
+          { label: "RNO", value: 20.22, variation: 2.2 },
+          { label: "AIR", value: 220.2, variation: 2.2 }
+        ]
+  
+  company:
+    type: object
+    properties:
+      label:
+        type: string
+        description: stock label 
+
 

@@ -31,12 +31,72 @@ func init() {
     "version": "0.1"
   },
   "paths": {
+    "/stock": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "summary": "get stocks",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "company stock label",
+            "name": "label",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "schema": {
+              "$ref": "#/definitions/stock"
+            }
+          },
+          "400": {
+            "description": "bad request"
+          },
+          "404": {
+            "description": "company not found"
+          },
+          "500": {
+            "description": "internal error"
+          }
+        }
+      },
+      "post": {
+        "produces": [
+          "application/json"
+        ],
+        "summary": "add a new company to crawler",
+        "parameters": [
+          {
+            "name": "label",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/company"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "created"
+          },
+          "400": {
+            "description": "bad request"
+          },
+          "500": {
+            "description": "internal error"
+          }
+        }
+      }
+    },
     "/stocks": {
       "get": {
         "produces": [
           "application/json"
         ],
-        "summary": "List all watched .",
+        "summary": "List all followed companies",
         "responses": {
           "200": {
             "description": "ok",
@@ -58,6 +118,65 @@ func init() {
         }
       }
     }
+  },
+  "definitions": {
+    "company": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "description": "stock label",
+          "type": "string"
+        }
+      }
+    },
+    "stock": {
+      "description": "list of stock values",
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "number"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/stockValue"
+          }
+        }
+      },
+      "example": {
+        "count": 2,
+        "values": [
+          {
+            "label": "RNO",
+            "value": 20.22,
+            "variation": 2.2
+          },
+          {
+            "label": "AIR",
+            "value": 220.2,
+            "variation": 2.2
+          }
+        ]
+      }
+    },
+    "stockValue": {
+      "description": "stock value and variation of a company",
+      "type": "object",
+      "properties": {
+        "label": {
+          "description": "company label",
+          "type": "string"
+        },
+        "value": {
+          "description": "value of the stock company",
+          "type": "number"
+        },
+        "variation": {
+          "description": "value of the daily variation of the stock value",
+          "type": "number"
+        }
+      }
+    }
   }
 }`))
 	FlatSwaggerJSON = json.RawMessage([]byte(`{
@@ -74,12 +193,72 @@ func init() {
     "version": "0.1"
   },
   "paths": {
+    "/stock": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "summary": "get stocks",
+        "parameters": [
+          {
+            "type": "string",
+            "description": "company stock label",
+            "name": "label",
+            "in": "query"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok",
+            "schema": {
+              "$ref": "#/definitions/stock"
+            }
+          },
+          "400": {
+            "description": "bad request"
+          },
+          "404": {
+            "description": "company not found"
+          },
+          "500": {
+            "description": "internal error"
+          }
+        }
+      },
+      "post": {
+        "produces": [
+          "application/json"
+        ],
+        "summary": "add a new company to crawler",
+        "parameters": [
+          {
+            "name": "label",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/company"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "created"
+          },
+          "400": {
+            "description": "bad request"
+          },
+          "500": {
+            "description": "internal error"
+          }
+        }
+      }
+    },
     "/stocks": {
       "get": {
         "produces": [
           "application/json"
         ],
-        "summary": "List all watched .",
+        "summary": "List all followed companies",
         "responses": {
           "200": {
             "description": "ok",
@@ -111,6 +290,63 @@ func init() {
       "properties": {
         "P0": {
           "type": "string"
+        }
+      }
+    },
+    "company": {
+      "type": "object",
+      "properties": {
+        "label": {
+          "description": "stock label",
+          "type": "string"
+        }
+      }
+    },
+    "stock": {
+      "description": "list of stock values",
+      "type": "object",
+      "properties": {
+        "count": {
+          "type": "number"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/stockValue"
+          }
+        }
+      },
+      "example": {
+        "count": 2,
+        "values": [
+          {
+            "label": "RNO",
+            "value": 20.22,
+            "variation": 2.2
+          },
+          {
+            "label": "AIR",
+            "value": 220.2,
+            "variation": 2.2
+          }
+        ]
+      }
+    },
+    "stockValue": {
+      "description": "stock value and variation of a company",
+      "type": "object",
+      "properties": {
+        "label": {
+          "description": "company label",
+          "type": "string"
+        },
+        "value": {
+          "description": "value of the stock company",
+          "type": "number"
+        },
+        "variation": {
+          "description": "value of the daily variation of the stock value",
+          "type": "number"
         }
       }
     }

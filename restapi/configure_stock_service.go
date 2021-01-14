@@ -10,7 +10,7 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 
-	"github/tupyy/stock/restapi/operations"
+	"github.com/tupyy/stock/restapi/operations"
 )
 
 //go:generate swagger generate server --target ../../stock-crawler --name StockService --spec ../target/swagger.yaml --principal interface{}
@@ -37,9 +37,19 @@ func configureAPI(api *operations.StockServiceAPI) http.Handler {
 
 	api.JSONProducer = runtime.JSONProducer()
 
+	if api.GetStockHandler == nil {
+		api.GetStockHandler = operations.GetStockHandlerFunc(func(params operations.GetStockParams) middleware.Responder {
+			return middleware.NotImplemented("operation operations.GetStock has not yet been implemented")
+		})
+	}
 	if api.GetStocksHandler == nil {
 		api.GetStocksHandler = operations.GetStocksHandlerFunc(func(params operations.GetStocksParams) middleware.Responder {
 			return middleware.NotImplemented("operation operations.GetStocks has not yet been implemented")
+		})
+	}
+	if api.PostStockHandler == nil {
+		api.PostStockHandler = operations.PostStockHandlerFunc(func(params operations.PostStockParams) middleware.Responder {
+			return middleware.NotImplemented("operation operations.PostStock has not yet been implemented")
 		})
 	}
 

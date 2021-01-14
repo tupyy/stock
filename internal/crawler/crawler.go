@@ -1,68 +1,68 @@
-package main
+package crawler
 
 import (
-	"fmt"
-	"github.com/buger/jsonparser"
-	"io/ioutil"
+	"context"
 	"net/http"
+    "fmt"
+	"time"
+
+	log "github.com/golang/glog"
 )
 
 const (
 	api = "https://www.boursorama.com/bourse/action/graph/ws/UpdateCharts"
 )
 
-type StockValue struct {
-	Value     float64
-	Variation float64
+var (
+	client *http.Client
+
+	// list of companies labels
+	companies []string
+)
+
+func Start(ctx context.Context, companies []string) *StockContainer {
+	client = &http.Client{}
+	stocks := newStocks()
+
+	output := make(chan StockValue)
+	go func() {
+		for {
+			select {
+			case <-ctx.Done():
+				return
+			case v := <-output:
+				stocks.addStockValue(v)
+			}
+		}
+	}()
+
+	t := 2 * time.Second
+	for _, s := range companies {
+		u := createUrl(s)
+
+		log.V(1).Infof("starting crawler for %s", s)
+		go crawl(ctx, client, u, output, t)
+	}
+
+	return stocks
+
 }
 
-func createUrl(company string) string {
-	return fmt.Sprintf("%s?symbol=1rP%s&period=-1", api, company)
-}
+func crawl(ctx context.Context, client *http.Client, url string, output chan StockValue, tick time.Duration) {
+	for {
+		select {
+		case <-ctx.Done():
+			return
+		case <-time.After(tick):
+			val, err := getStock(client, url)
+			if err != nil {
+				log.V(1).Error(fmt.Sprintf("error getting stock %v", err))
+			} else {
+				log.V(2).Info(fmt.Sprintf("stock :%+v", val))
+				output <- val
+			}
 
-func doRequest(client *http.Client, url string) ([]byte, error) {
-	req, err := http.NewRequest(http.MethodGet, url, nil)
-	req.Header.Add("Content-Type", "application/json")
-
-	resp, err := client.Do(req)
-	if err != nil {
-		return []byte{}, err
+		}
 	}
-	defer resp.Body.Close()
-
-	if resp.StatusCode != 200 {
-		return nil, fmt.Errorf("response status code %d", resp.StatusCode)
-	}
-
-	body, err := ioutil.ReadAll(resp.Body)
-	if err != nil {
-		return []byte{}, err
-	}
-	return body, nil
-}
-
-func getStock(client *http.Client, company string) (StockValue, error) {
-	data, err := doRequest(client, createUrl(company))
-	if err != nil {
-		return StockValue{}, err
-	}
-
-	s := StockValue{}
-	if val, err := jsonparser.GetFloat(data, "d", "[0]", "c"); err == nil {
-		s.Value = val
-	}
-
-	if val, err := jsonparser.GetFloat(data, "d", "[0]", "var"); err == nil {
-		s.Variation = val
-	}
-
-	return s, nil
-}
-
-func main() {
-
-	client := &http.Client{}
-	s, _ := getStock(client, "RNO")
-	fmt.Printf("%2.2f,%1.2f", s.Value, s.Variation)
 
 }
