@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+    "crypto/tls"
 
 	log "github.com/sirupsen/logrus"
 	"github.com/tupyy/stock/models"
@@ -22,7 +23,10 @@ var (
 )
 
 func Start(ctx context.Context, companies []string) *StockContainer {
-	client = &http.Client{}
+	tr := &http.Transport{
+		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
+	}
+	client := &http.Client{Transport: tr}
 	stocks := newStocks()
 
 	output := make(chan models.StockValue)
