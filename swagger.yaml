@@ -1,0 +1,30 @@
+swagger: "2.0"
+
+info:
+  title: "stock service"
+  description: "This API provide the recent stock value"
+  version: "#VERSION#"
+
+schemes:
+  - "http"
+produces:
+  - "application/json"
+
+paths:
+  /stocks:
+    get:
+      summary: "List all watched ."
+      produces:
+        - "application/json"
+      responses:
+        200:
+          description: "ok"
+          schema:
+            type: array
+            items:
+              - type: string
+        402:
+          description: "method not allowed"
+        500:
+          description: "Internal error."
+
