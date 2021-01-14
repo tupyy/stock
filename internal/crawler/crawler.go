@@ -2,11 +2,12 @@ package crawler
 
 import (
 	"context"
+	"fmt"
 	"net/http"
-    "fmt"
 	"time"
 
-	log "github.com/golang/glog"
+	log "github.com/sirupsen/logrus"
+	"github.com/tupyy/stock/models"
 )
 
 const (
@@ -24,11 +25,12 @@ func Start(ctx context.Context, companies []string) *StockContainer {
 	client = &http.Client{}
 	stocks := newStocks()
 
-	output := make(chan StockValue)
+	output := make(chan models.StockValue)
 	go func() {
 		for {
 			select {
 			case <-ctx.Done():
+				log.Info("context closed")
 				return
 			case v := <-output:
 				stocks.addStockValue(v)
@@ -38,27 +40,26 @@ func Start(ctx context.Context, companies []string) *StockContainer {
 
 	t := 2 * time.Second
 	for _, s := range companies {
-		u := createUrl(s)
-
-		log.V(1).Infof("starting crawler for %s", s)
-		go crawl(ctx, client, u, output, t)
+		log.Infof("starting crawler for %s", s)
+		go crawl(ctx, client, s, output, t)
 	}
 
 	return stocks
 
 }
 
-func crawl(ctx context.Context, client *http.Client, url string, output chan StockValue, tick time.Duration) {
+func crawl(ctx context.Context, client *http.Client, company string, output chan models.StockValue, tick time.Duration) {
 	for {
 		select {
 		case <-ctx.Done():
+			log.Info("exit from crawler")
 			return
 		case <-time.After(tick):
-			val, err := getStock(client, url)
+			val, err := getStock(client, company)
 			if err != nil {
-				log.V(1).Error(fmt.Sprintf("error getting stock %v", err))
+				log.Errorf(fmt.Sprintf("error getting stock %v", err))
 			} else {
-				log.V(2).Info(fmt.Sprintf("stock :%+v", val))
+				log.Debug(fmt.Sprintf("stock :%+v", val))
 				output <- val
 			}
 

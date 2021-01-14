@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"net/http"
 
+	"io/ioutil"
+
 	"github.com/buger/jsonparser"
+	"github.com/tupyy/stock/models"
 )
 
 func createUrl(company string) string {
@@ -32,13 +35,13 @@ func doRequest(client *http.Client, url string) ([]byte, error) {
 	return body, nil
 }
 
-func getStock(client *http.Client, company string) (StockValue, error) {
+func getStock(client *http.Client, company string) (models.StockValue, error) {
 	data, err := doRequest(client, createUrl(company))
 	if err != nil {
-		return StockValue{}, err
+		return models.StockValue{}, err
 	}
 
-	s := StockValue{}
+	s := models.StockValue{Label: company}
 	if val, err := jsonparser.GetFloat(data, "d", "[0]", "c"); err == nil {
 		s.Value = val
 	}

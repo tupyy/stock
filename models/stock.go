@@ -19,7 +19,7 @@ import (
 type Stock struct {
 
 	// count
-	Count float64 `json:"count,omitempty"`
+	Count int64 `json:"count,omitempty"`
 
 	// values
 	Values []*StockValue `json:"values"`

@@ -3,6 +3,7 @@
 package restapi
 
 import (
+	"context"
 	"crypto/tls"
 	"net/http"
 
@@ -10,7 +11,11 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 
+	"github.com/tupyy/stock/internal/crawler"
+	"github.com/tupyy/stock/models"
 	"github.com/tupyy/stock/restapi/operations"
+
+	log "github.com/sirupsen/logrus"
 )
 
 //go:generate swagger generate server --target ../../stock-crawler --name StockService --spec ../target/swagger.yaml --principal interface{}
@@ -27,7 +32,7 @@ func configureAPI(api *operations.StockServiceAPI) http.Handler {
 	// Expected interface func(string, ...interface{})
 	//
 	// Example:
-	// api.Logger = log.Printf
+	api.Logger = log.Infof
 
 	api.UseSwaggerUI()
 	// To continue using redoc as your UI, uncomment the following line
@@ -37,9 +42,25 @@ func configureAPI(api *operations.StockServiceAPI) http.Handler {
 
 	api.JSONProducer = runtime.JSONProducer()
 
+	ctx, cancel := context.WithCancel(context.Background())
+	stockContainer := crawler.Start(ctx, []string{"AIR", "RNO"})
+
 	if api.GetStockHandler == nil {
 		api.GetStockHandler = operations.GetStockHandlerFunc(func(params operations.GetStockParams) middleware.Responder {
-			return middleware.NotImplemented("operation operations.GetStock has not yet been implemented")
+			payload := models.Stock{}
+			if params.Label != nil {
+				s, err := stockContainer.GetStock(*params.Label)
+				if err != nil {
+					return operations.NewGetStockNotFound()
+				}
+
+				payload.Count = 1
+				payload.Values = append(payload.Values, &s)
+				return operations.NewGetStockOK().WithPayload(&payload)
+			}
+
+			payload.Count, payload.Values = stockContainer.GetStocks()
+			return operations.NewGetStockOK().WithPayload(&payload)
 		})
 	}
 	if api.GetStocksHandler == nil {
@@ -53,7 +74,9 @@ func configureAPI(api *operations.StockServiceAPI) http.Handler {
 		})
 	}
 
-	api.PreServerShutdown = func() {}
+	api.PreServerShutdown = func() {
+		cancel()
+	}
 
 	api.ServerShutdown = func() {}
 

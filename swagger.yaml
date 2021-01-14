@@ -85,7 +85,7 @@ definitions:
     description: list of stock values
     properties:
       count:
-        type: number
+        type: integer
       values:
         type: array
         items: 

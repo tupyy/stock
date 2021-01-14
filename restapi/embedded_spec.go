@@ -134,7 +134,7 @@ func init() {
       "type": "object",
       "properties": {
         "count": {
-          "type": "number"
+          "type": "integer"
         },
         "values": {
           "type": "array",
@@ -307,7 +307,7 @@ func init() {
       "type": "object",
       "properties": {
         "count": {
-          "type": "number"
+          "type": "integer"
         },
         "values": {
           "type": "array",
