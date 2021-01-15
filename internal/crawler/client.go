@@ -43,7 +43,7 @@ func getStock(client *http.Client, company string) (models.StockValue, error) {
 
 	s := models.StockValue{Label: company}
 	if val, err := jsonparser.GetFloat(data, "d", "[0]", "c"); err == nil {
-		s.Value = val
+		s.Value = &val
 	}
 
 	if val, err := jsonparser.GetFloat(data, "d", "[0]", "var"); err == nil {

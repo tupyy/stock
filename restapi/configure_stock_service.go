@@ -60,6 +60,9 @@ func configureAPI(api *operations.StockServiceAPI) http.Handler {
 			}
 
 			payload.Count, payload.Values = stockContainer.GetStocks()
+			if payload.Count == 0 {
+				return &operations.GetStockOK{}
+			}
 			return operations.NewGetStockOK().WithPayload(&payload)
 		})
 	}

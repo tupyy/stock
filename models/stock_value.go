@@ -6,8 +6,10 @@ package models
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
+	"github.com/go-openapi/errors"
 	"github.com/go-openapi/strfmt"
 	"github.com/go-openapi/swag"
+	"github.com/go-openapi/validate"
 )
 
 // StockValue stock value and variation of a company
@@ -19,7 +21,8 @@ type StockValue struct {
 	Label string `json:"label,omitempty"`
 
 	// value of the stock company
-	Value float64 `json:"value,omitempty"`
+	// Minimum: 0
+	Value *float64 `json:"value,omitempty"`
 
 	// value of the daily variation of the stock value
 	Variation float64 `json:"variation,omitempty"`
@@ -27,6 +30,28 @@ type StockValue struct {
 
 // Validate validates this stock value
 func (m *StockValue) Validate(formats strfmt.Registry) error {
+	var res []error
+
+	if err := m.validateValue(formats); err != nil {
+		res = append(res, err)
+	}
+
+	if len(res) > 0 {
+		return errors.CompositeValidationError(res...)
+	}
+	return nil
+}
+
+func (m *StockValue) validateValue(formats strfmt.Registry) error {
+
+	if swag.IsZero(m.Value) { // not required
+		return nil
+	}
+
+	if err := validate.Minimum("value", "body", float64(*m.Value), 0, false); err != nil {
+		return err
+	}
+
 	return nil
 }
 

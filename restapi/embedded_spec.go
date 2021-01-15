@@ -342,7 +342,8 @@ func init() {
         },
         "value": {
           "description": "value of the stock company",
-          "type": "number"
+          "type": "number",
+          "minimum": 0
         },
         "variation": {
           "description": "value of the daily variation of the stock value",
