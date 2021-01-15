@@ -77,7 +77,6 @@ definitions:
       value:
         type: number
         description: value of the stock company
-        minimum: 0
       variation:
         type: number
         description: value of the daily variation of the stock value

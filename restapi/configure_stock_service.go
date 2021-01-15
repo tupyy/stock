@@ -6,6 +6,7 @@ import (
 	"context"
 	"crypto/tls"
 	"net/http"
+	"os"
 
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
@@ -25,6 +26,8 @@ func configureFlags(api *operations.StockServiceAPI) {
 }
 
 func configureAPI(api *operations.StockServiceAPI) http.Handler {
+	configureGlobal()
+
 	// configure the api here
 	api.ServeError = errors.ServeError
 
@@ -32,7 +35,7 @@ func configureAPI(api *operations.StockServiceAPI) http.Handler {
 	// Expected interface func(string, ...interface{})
 	//
 	// Example:
-	api.Logger = log.Infof
+	api.Logger = log.Printf
 
 	api.UseSwaggerUI()
 	// To continue using redoc as your UI, uncomment the following line
@@ -108,4 +111,15 @@ func setupMiddlewares(handler http.Handler) http.Handler {
 // So this is a good place to plug in a panic handling middleware, logging and metrics
 func setupGlobalMiddleware(handler http.Handler) http.Handler {
 	return handler
+}
+
+func configureGlobal() {
+	// Set log output
+	log.SetOutput(os.Stdout)
+	log.SetFormatter(&log.TextFormatter{})
+
+	log.SetLevel(log.InfoLevel)
+	if os.Getenv("DEBUG") == "1" {
+		log.SetLevel(log.DebugLevel)
+	}
 }

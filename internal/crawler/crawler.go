@@ -35,12 +35,13 @@ func Start(ctx context.Context, companies []string) *StockContainer {
 
 	output := make(chan models.StockValue)
 	go func() {
-		select {
-		case <-ctx.Done():
-			log.Info("context closed")
-			return
-		case v := <-output:
-			if v.Value != nil {
+		for {
+			select {
+			case <-ctx.Done():
+				log.Info("context closed")
+				return
+			case v := <-output:
+				log.Debug("stock saved")
 				stocks.addStockValue(v)
 			}
 		}
@@ -82,7 +83,7 @@ func crawl(ctx context.Context, client *http.Client, company string, output chan
 func createCanCrawl() canCrawl {
 	return func() bool {
 		now := time.Now()
-		if now.Hour() > 9 && now.Hour() < 18 {
+		if now.Hour() >= 9 && now.Hour() < 18 {
 			return true
 		}
 		return false

@@ -28,7 +28,7 @@ func init() {
   "info": {
     "description": "This API provide the recent stock value",
     "title": "stock service",
-    "version": "0.1"
+    "version": "0.2"
   },
   "paths": {
     "/stock": {
@@ -190,7 +190,7 @@ func init() {
   "info": {
     "description": "This API provide the recent stock value",
     "title": "stock service",
-    "version": "0.1"
+    "version": "0.2"
   },
   "paths": {
     "/stock": {
@@ -342,8 +342,7 @@ func init() {
         },
         "value": {
           "description": "value of the stock company",
-          "type": "number",
-          "minimum": 0
+          "type": "number"
         },
         "variation": {
           "description": "value of the daily variation of the stock value",
