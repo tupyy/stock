@@ -9,17 +9,22 @@ import (
 	"errors"
 	"net/url"
 	golangswaggerpaths "path"
+	"strings"
 )
 
-// PostStockURL generates an URL for the post stock operation
-type PostStockURL struct {
+// PostStockCompanyURL generates an URL for the post stock company operation
+type PostStockCompanyURL struct {
+	Company string
+
 	_basePath string
+	// avoid unkeyed usage
+	_ struct{}
 }
 
 // WithBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *PostStockURL) WithBasePath(bp string) *PostStockURL {
+func (o *PostStockCompanyURL) WithBasePath(bp string) *PostStockCompanyURL {
 	o.SetBasePath(bp)
 	return o
 }
@@ -27,15 +32,22 @@ func (o *PostStockURL) WithBasePath(bp string) *PostStockURL {
 // SetBasePath sets the base path for this url builder, only required when it's different from the
 // base path specified in the swagger spec.
 // When the value of the base path is an empty string
-func (o *PostStockURL) SetBasePath(bp string) {
+func (o *PostStockCompanyURL) SetBasePath(bp string) {
 	o._basePath = bp
 }
 
 // Build a url path and query string
-func (o *PostStockURL) Build() (*url.URL, error) {
+func (o *PostStockCompanyURL) Build() (*url.URL, error) {
 	var _result url.URL
 
-	var _path = "/stock"
+	var _path = "/stock/{company}"
+
+	company := o.Company
+	if company != "" {
+		_path = strings.Replace(_path, "{company}", company, -1)
+	} else {
+		return nil, errors.New("company is required on PostStockCompanyURL")
+	}
 
 	_basePath := o._basePath
 	_result.Path = golangswaggerpaths.Join(_basePath, _path)
@@ -44,7 +56,7 @@ func (o *PostStockURL) Build() (*url.URL, error) {
 }
 
 // Must is a helper function to panic when the url builder returns an error
-func (o *PostStockURL) Must(u *url.URL, err error) *url.URL {
+func (o *PostStockCompanyURL) Must(u *url.URL, err error) *url.URL {
 	if err != nil {
 		panic(err)
 	}
@@ -55,17 +67,17 @@ func (o *PostStockURL) Must(u *url.URL, err error) *url.URL {
 }
 
 // String returns the string representation of the path with query string
-func (o *PostStockURL) String() string {
+func (o *PostStockCompanyURL) String() string {
 	return o.Must(o.Build()).String()
 }
 
 // BuildFull builds a full url with scheme, host, path and query string
-func (o *PostStockURL) BuildFull(scheme, host string) (*url.URL, error) {
+func (o *PostStockCompanyURL) BuildFull(scheme, host string) (*url.URL, error) {
 	if scheme == "" {
-		return nil, errors.New("scheme is required for a full url on PostStockURL")
+		return nil, errors.New("scheme is required for a full url on PostStockCompanyURL")
 	}
 	if host == "" {
-		return nil, errors.New("host is required for a full url on PostStockURL")
+		return nil, errors.New("host is required for a full url on PostStockCompanyURL")
 	}
 
 	base, err := o.Build()
@@ -79,6 +91,6 @@ func (o *PostStockURL) BuildFull(scheme, host string) (*url.URL, error) {
 }
 
 // StringFull returns the string representation of a complete url
-func (o *PostStockURL) StringFull(scheme, host string) string {
+func (o *PostStockCompanyURL) StringFull(scheme, host string) string {
 	return o.Must(o.BuildFull(scheme, host)).String()
 }

@@ -3,7 +3,7 @@ package crawler
 import (
 	"context"
 	"crypto/tls"
-	"fmt"
+	"errors"
 	"net/http"
 	"time"
 
@@ -24,16 +24,23 @@ var (
 
 	// list of companies labels
 	companies []string
+
+	workers map[string]*CrawlWorker
+
+	output chan models.StockValue
+
+	parentContext context.Context
 )
 
 func Start(ctx context.Context, companies []string) *StockContainer {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
-	client := &http.Client{Transport: tr}
+	client = &http.Client{Transport: tr}
 	stocks := newStocks()
 
-	output := make(chan models.StockValue)
+	parentContext = ctx
+	output = make(chan models.StockValue)
 	go func() {
 		for {
 			select {
@@ -48,41 +55,46 @@ func Start(ctx context.Context, companies []string) *StockContainer {
 	}()
 
 	t := 2 * time.Second
-	for _, s := range companies {
-		log.Infof("starting crawler for %s", s)
-		go crawl(ctx, client, s, output, t, createCanCrawl())
+	workers = make(map[string]*CrawlWorker)
+	for _, c := range companies {
+		log.Infof("starting crawler for %s", c)
+		w := NewCrawlWorker(output, t, createCanCrawl())
+		go w.Run(parentContext, client, c)
+		workers[c] = w
 	}
 
 	return stocks
-
 }
 
-func crawl(ctx context.Context, client *http.Client, company string, output chan models.StockValue, tick time.Duration, c canCrawl) {
-	for {
-		select {
-		case <-ctx.Done():
-			log.Info("exit from crawler")
-			return
-		case <-time.After(tick):
-			if c() {
-				val, err := getStock(client, company)
-				if err != nil {
-					log.Errorf(fmt.Sprintf("error getting stock %v", err))
-				} else {
-					log.Debug(fmt.Sprintf("stock :%+v", val))
-					output <- val
-				}
-			} else {
-				log.Debug("cannot crawl")
-			}
-		}
+func AddCompany(company string) {
+	w := NewCrawlWorker(output, 2*time.Second, createCanCrawl())
+	go w.Run(parentContext, client, company)
+	workers[company] = w
+}
 
+func DeleteCompany(company string) error {
+	if w, ok := workers[company]; ok {
+		log.Infof("remove worker for company '%s'", company)
+		w.Shutdown()
+		w = nil
+		delete(workers, company)
+		return nil
 	}
+
+	return errors.New("company not found")
 }
 
+// return function to schedule crawling.
 func createCanCrawl() canCrawl {
 	return func() bool {
 		now := time.Now()
+
+		// dont crawl in weekends
+		if now.Day() > 4 {
+			return false
+		}
+
+		// crawl between 9 - 18
 		if now.Hour() >= 9 && now.Hour() < 18 {
 			return true
 		}

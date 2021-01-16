@@ -62,7 +62,9 @@ func init() {
             "description": "internal error"
           }
         }
-      },
+      }
+    },
+    "/stock/{company}": {
       "post": {
         "produces": [
           "application/json"
@@ -70,12 +72,10 @@ func init() {
         "summary": "add a new company to crawler",
         "parameters": [
           {
-            "name": "label",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/company"
-            }
+            "type": "string",
+            "name": "company",
+            "in": "path",
+            "required": true
           }
         ],
         "responses": {
@@ -84,6 +84,28 @@ func init() {
           },
           "400": {
             "description": "bad request"
+          },
+          "500": {
+            "description": "internal error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "stop crawling a company",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "company",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok"
+          },
+          "404": {
+            "description": "company not found"
           },
           "500": {
             "description": "internal error"
@@ -224,7 +246,9 @@ func init() {
             "description": "internal error"
           }
         }
-      },
+      }
+    },
+    "/stock/{company}": {
       "post": {
         "produces": [
           "application/json"
@@ -232,12 +256,10 @@ func init() {
         "summary": "add a new company to crawler",
         "parameters": [
           {
-            "name": "label",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/company"
-            }
+            "type": "string",
+            "name": "company",
+            "in": "path",
+            "required": true
           }
         ],
         "responses": {
@@ -246,6 +268,28 @@ func init() {
           },
           "400": {
             "description": "bad request"
+          },
+          "500": {
+            "description": "internal error"
+          }
+        }
+      },
+      "delete": {
+        "summary": "stop crawling a company",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "company",
+            "in": "path",
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "ok"
+          },
+          "404": {
+            "description": "company not found"
           },
           "500": {
             "description": "internal error"

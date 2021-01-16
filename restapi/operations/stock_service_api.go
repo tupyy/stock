@@ -45,9 +45,6 @@ func NewStockServiceAPI(spec *loads.Document) *StockServiceAPI {
 		GetStocksHandler: GetStocksHandlerFunc(func(params GetStocksParams) middleware.Responder {
 			return middleware.NotImplemented("operation GetStocks has not yet been implemented")
 		}),
-		PostStockHandler: PostStockHandlerFunc(func(params PostStockParams) middleware.Responder {
-			return middleware.NotImplemented("operation PostStock has not yet been implemented")
-		}),
 	}
 }
 
@@ -82,12 +79,14 @@ type StockServiceAPI struct {
 	//   - application/json
 	JSONProducer runtime.Producer
 
+	// DeleteStockCompanyHandler sets the operation handler for the delete stock company operation
+	DeleteStockCompanyHandler DeleteStockCompanyHandler
 	// GetStockHandler sets the operation handler for the get stock operation
 	GetStockHandler GetStockHandler
 	// GetStocksHandler sets the operation handler for the get stocks operation
 	GetStocksHandler GetStocksHandler
-	// PostStockHandler sets the operation handler for the post stock operation
-	PostStockHandler PostStockHandler
+	// PostStockCompanyHandler sets the operation handler for the post stock company operation
+	PostStockCompanyHandler PostStockCompanyHandler
 	// ServeError is called when an error is received, there is a default handler
 	// but you can set your own with this
 	ServeError func(http.ResponseWriter, *http.Request, error)
@@ -164,14 +163,17 @@ func (o *StockServiceAPI) Validate() error {
 		unregistered = append(unregistered, "JSONProducer")
 	}
 
+	if o.DeleteStockCompanyHandler == nil {
+		unregistered = append(unregistered, "DeleteStockCompanyHandler")
+	}
 	if o.GetStockHandler == nil {
 		unregistered = append(unregistered, "GetStockHandler")
 	}
 	if o.GetStocksHandler == nil {
 		unregistered = append(unregistered, "GetStocksHandler")
 	}
-	if o.PostStockHandler == nil {
-		unregistered = append(unregistered, "PostStockHandler")
+	if o.PostStockCompanyHandler == nil {
+		unregistered = append(unregistered, "PostStockCompanyHandler")
 	}
 
 	if len(unregistered) > 0 {
@@ -261,6 +263,10 @@ func (o *StockServiceAPI) initHandlerCache() {
 		o.handlers = make(map[string]map[string]http.Handler)
 	}
 
+	if o.handlers["DELETE"] == nil {
+		o.handlers["DELETE"] = make(map[string]http.Handler)
+	}
+	o.handlers["DELETE"]["/stock/{company}"] = NewDeleteStockCompany(o.context, o.DeleteStockCompanyHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
@@ -272,7 +278,7 @@ func (o *StockServiceAPI) initHandlerCache() {
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
-	o.handlers["POST"]["/stock"] = NewPostStock(o.context, o.PostStockHandler)
+	o.handlers["POST"]["/stock/{company}"] = NewPostStockCompany(o.context, o.PostStockCompanyHandler)
 }
 
 // Serve creates a http handler to serve the API over HTTP
