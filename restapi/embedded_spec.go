@@ -123,12 +123,18 @@ func init() {
           "200": {
             "description": "ok",
             "schema": {
-              "type": "array",
-              "items": [
-                {
-                  "type": "string"
+              "type": "object",
+              "required": [
+                "companies"
+              ],
+              "properties": {
+                "companies": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 }
-              ]
+              }
             }
           },
           "402": {
@@ -307,12 +313,18 @@ func init() {
           "200": {
             "description": "ok",
             "schema": {
-              "type": "array",
-              "items": [
-                {
-                  "type": "string"
+              "type": "object",
+              "required": [
+                "companies"
+              ],
+              "properties": {
+                "companies": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
                 }
-              ]
+              }
             }
           },
           "402": {
@@ -326,17 +338,6 @@ func init() {
     }
   },
   "definitions": {
-    "GetStocksOKBodyTuple0": {
-      "type": "object",
-      "required": [
-        "P0"
-      ],
-      "properties": {
-        "P0": {
-          "type": "string"
-        }
-      }
-    },
     "company": {
       "type": "object",
       "properties": {

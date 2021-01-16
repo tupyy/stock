@@ -23,7 +23,7 @@ type GetStocksOK struct {
 	/*
 	  In: Body
 	*/
-	Payload *GetStocksOKBodyTuple0 `json:"body,omitempty"`
+	Payload *GetStocksOKBody `json:"body,omitempty"`
 }
 
 // NewGetStocksOK creates GetStocksOK with default headers values
@@ -33,13 +33,13 @@ func NewGetStocksOK() *GetStocksOK {
 }
 
 // WithPayload adds the payload to the get stocks o k response
-func (o *GetStocksOK) WithPayload(payload *GetStocksOKBodyTuple0) *GetStocksOK {
+func (o *GetStocksOK) WithPayload(payload *GetStocksOKBody) *GetStocksOK {
 	o.Payload = payload
 	return o
 }
 
 // SetPayload sets the payload to the get stocks o k response
-func (o *GetStocksOK) SetPayload(payload *GetStocksOKBodyTuple0) {
+func (o *GetStocksOK) SetPayload(payload *GetStocksOKBody) {
 	o.Payload = payload
 }
 

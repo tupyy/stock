@@ -71,7 +71,9 @@ func configureAPI(api *operations.StockServiceAPI) http.Handler {
 	}
 	if api.GetStocksHandler == nil {
 		api.GetStocksHandler = operations.GetStocksHandlerFunc(func(params operations.GetStocksParams) middleware.Responder {
-			return middleware.NotImplemented("operation operations.GetStocks has not yet been implemented")
+			payload := &operations.GetStocksOKBody{Companies: crawler.Companies()}
+
+			return operations.NewGetStocksOK().WithPayload(payload)
 		})
 	}
 	if api.PostStockCompanyHandler == nil {

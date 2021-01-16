@@ -41,10 +41,6 @@ func NewStockServiceAPI(spec *loads.Document) *StockServiceAPI {
 		JSONConsumer: runtime.JSONConsumer(),
 
 		JSONProducer: runtime.JSONProducer(),
-
-		GetStocksHandler: GetStocksHandlerFunc(func(params GetStocksParams) middleware.Responder {
-			return middleware.NotImplemented("operation GetStocks has not yet been implemented")
-		}),
 	}
 }
 

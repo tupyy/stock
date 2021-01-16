@@ -6,8 +6,6 @@ package operations
 // Editing this file might prove futile when you re-run the swagger generate command
 
 import (
-	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 
@@ -60,20 +58,20 @@ func NewGetStocksOK() *GetStocksOK {
 ok
 */
 type GetStocksOK struct {
-	Payload *GetStocksOKBodyTuple0
+	Payload *GetStocksOKBody
 }
 
 func (o *GetStocksOK) Error() string {
 	return fmt.Sprintf("[GET /stocks][%d] getStocksOK  %+v", 200, o.Payload)
 }
 
-func (o *GetStocksOK) GetPayload() *GetStocksOKBodyTuple0 {
+func (o *GetStocksOK) GetPayload() *GetStocksOKBody {
 	return o.Payload
 }
 
 func (o *GetStocksOK) readResponse(response runtime.ClientResponse, consumer runtime.Consumer, formats strfmt.Registry) error {
 
-	o.Payload = new(GetStocksOKBodyTuple0)
+	o.Payload = new(GetStocksOKBody)
 
 	// response payload
 	if err := consumer.Consume(response.Body(), o.Payload); err != nil && err != io.EOF {
@@ -125,59 +123,21 @@ func (o *GetStocksInternalServerError) readResponse(response runtime.ClientRespo
 	return nil
 }
 
-/*GetStocksOKBodyTuple0 GetStocksOKBodyTuple0 a representation of an anonymous Tuple type
-swagger:model GetStocksOKBodyTuple0
+/*GetStocksOKBody get stocks o k body
+swagger:model GetStocksOKBody
 */
-type GetStocksOKBodyTuple0 struct {
+type GetStocksOKBody struct {
 
-	// p0
+	// companies
 	// Required: true
-	P0 *string `json:"-"` // custom serializer
-
+	Companies []string `json:"companies"`
 }
 
-// UnmarshalJSON unmarshals this tuple type from a JSON array
-func (o *GetStocksOKBodyTuple0) UnmarshalJSON(raw []byte) error {
-	// stage 1, get the array but just the array
-	var stage1 []json.RawMessage
-	buf := bytes.NewBuffer(raw)
-	dec := json.NewDecoder(buf)
-	dec.UseNumber()
-
-	if err := dec.Decode(&stage1); err != nil {
-		return err
-	}
-
-	// stage 2: hydrates struct members with tuple elements
-	if len(stage1) > 0 {
-		var dataP0 string
-		buf = bytes.NewBuffer(stage1[0])
-		dec := json.NewDecoder(buf)
-		dec.UseNumber()
-		if err := dec.Decode(&dataP0); err != nil {
-			return err
-		}
-		o.P0 = &dataP0
-
-	}
-
-	return nil
-}
-
-// MarshalJSON marshals this tuple type into a JSON array
-func (o GetStocksOKBodyTuple0) MarshalJSON() ([]byte, error) {
-	data := []interface{}{
-		o.P0,
-	}
-
-	return json.Marshal(data)
-}
-
-// Validate validates this get stocks o k body tuple0
-func (o *GetStocksOKBodyTuple0) Validate(formats strfmt.Registry) error {
+// Validate validates this get stocks o k body
+func (o *GetStocksOKBody) Validate(formats strfmt.Registry) error {
 	var res []error
 
-	if err := o.validateP0(formats); err != nil {
+	if err := o.validateCompanies(formats); err != nil {
 		res = append(res, err)
 	}
 
@@ -187,9 +147,9 @@ func (o *GetStocksOKBodyTuple0) Validate(formats strfmt.Registry) error {
 	return nil
 }
 
-func (o *GetStocksOKBodyTuple0) validateP0(formats strfmt.Registry) error {
+func (o *GetStocksOKBody) validateCompanies(formats strfmt.Registry) error {
 
-	if err := validate.Required("P0", "body", o.P0); err != nil {
+	if err := validate.Required("getStocksOK"+"."+"companies", "body", o.Companies); err != nil {
 		return err
 	}
 
@@ -197,7 +157,7 @@ func (o *GetStocksOKBodyTuple0) validateP0(formats strfmt.Registry) error {
 }
 
 // MarshalBinary interface implementation
-func (o *GetStocksOKBodyTuple0) MarshalBinary() ([]byte, error) {
+func (o *GetStocksOKBody) MarshalBinary() ([]byte, error) {
 	if o == nil {
 		return nil, nil
 	}
@@ -205,8 +165,8 @@ func (o *GetStocksOKBodyTuple0) MarshalBinary() ([]byte, error) {
 }
 
 // UnmarshalBinary interface implementation
-func (o *GetStocksOKBodyTuple0) UnmarshalBinary(b []byte) error {
-	var res GetStocksOKBodyTuple0
+func (o *GetStocksOKBody) UnmarshalBinary(b []byte) error {
+	var res GetStocksOKBody
 	if err := swag.ReadJSON(b, &res); err != nil {
 		return err
 	}

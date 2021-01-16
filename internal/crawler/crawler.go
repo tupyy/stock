@@ -84,6 +84,15 @@ func DeleteCompany(company string) error {
 	return errors.New("company not found")
 }
 
+func Companies() []string {
+	var companies []string
+	for k := range workers {
+		companies = append(companies, k)
+	}
+
+	return companies
+}
+
 // return function to schedule crawling.
 func createCanCrawl() canCrawl {
 	return func() bool {

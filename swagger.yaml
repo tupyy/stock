@@ -20,9 +20,14 @@ paths:
         200:
           description: "ok"
           schema:
-            type: array
-            items:
-              - type: string
+            type: object
+            required:
+            - companies
+            properties:
+              companies:
+                type: array
+                items:
+                  type: string
         402:
           description: "method not allowed"
         500:
