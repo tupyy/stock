@@ -74,6 +74,7 @@ func AddCompany(company string) {
 
 func DeleteCompany(company string) error {
 	if w, ok := workers[company]; ok {
+		log.Infof("remove worker for company '%s'", company)
 		w.Shutdown()
 		w = nil
 		delete(workers, company)

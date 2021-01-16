@@ -27,13 +27,49 @@ type Client struct {
 
 // ClientService is the interface for Client methods
 type ClientService interface {
+	DeleteStockCompany(params *DeleteStockCompanyParams) (*DeleteStockCompanyOK, error)
+
 	GetStock(params *GetStockParams) (*GetStockOK, error)
 
 	GetStocks(params *GetStocksParams) (*GetStocksOK, error)
 
-	PostStock(params *PostStockParams) (*PostStockCreated, error)
+	PostStockCompany(params *PostStockCompanyParams) (*PostStockCompanyCreated, error)
 
 	SetTransport(transport runtime.ClientTransport)
+}
+
+/*
+  DeleteStockCompany stops crawling a company
+*/
+func (a *Client) DeleteStockCompany(params *DeleteStockCompanyParams) (*DeleteStockCompanyOK, error) {
+	// TODO: Validate the params before sending
+	if params == nil {
+		params = NewDeleteStockCompanyParams()
+	}
+
+	result, err := a.transport.Submit(&runtime.ClientOperation{
+		ID:                 "DeleteStockCompany",
+		Method:             "DELETE",
+		PathPattern:        "/stock/{company}",
+		ProducesMediaTypes: []string{"application/json"},
+		ConsumesMediaTypes: []string{"application/json"},
+		Schemes:            []string{"http"},
+		Params:             params,
+		Reader:             &DeleteStockCompanyReader{formats: a.formats},
+		Context:            params.Context,
+		Client:             params.HTTPClient,
+	})
+	if err != nil {
+		return nil, err
+	}
+	success, ok := result.(*DeleteStockCompanyOK)
+	if ok {
+		return success, nil
+	}
+	// unexpected success response
+	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
+	msg := fmt.Sprintf("unexpected success response for DeleteStockCompany: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	panic(msg)
 }
 
 /*
@@ -105,36 +141,36 @@ func (a *Client) GetStocks(params *GetStocksParams) (*GetStocksOK, error) {
 }
 
 /*
-  PostStock adds a new company to crawler
+  PostStockCompany adds a new company to crawler
 */
-func (a *Client) PostStock(params *PostStockParams) (*PostStockCreated, error) {
+func (a *Client) PostStockCompany(params *PostStockCompanyParams) (*PostStockCompanyCreated, error) {
 	// TODO: Validate the params before sending
 	if params == nil {
-		params = NewPostStockParams()
+		params = NewPostStockCompanyParams()
 	}
 
 	result, err := a.transport.Submit(&runtime.ClientOperation{
-		ID:                 "PostStock",
+		ID:                 "PostStockCompany",
 		Method:             "POST",
-		PathPattern:        "/stock",
+		PathPattern:        "/stock/{company}",
 		ProducesMediaTypes: []string{"application/json"},
 		ConsumesMediaTypes: []string{"application/json"},
 		Schemes:            []string{"http"},
 		Params:             params,
-		Reader:             &PostStockReader{formats: a.formats},
+		Reader:             &PostStockCompanyReader{formats: a.formats},
 		Context:            params.Context,
 		Client:             params.HTTPClient,
 	})
 	if err != nil {
 		return nil, err
 	}
-	success, ok := result.(*PostStockCreated)
+	success, ok := result.(*PostStockCompanyCreated)
 	if ok {
 		return success, nil
 	}
 	// unexpected success response
 	// safeguard: normally, absent a default response, unknown success responses return an error above: so this is a codegen issue
-	msg := fmt.Sprintf("unexpected success response for PostStock: API contract not enforced by server. Client expected to get an error, but got: %T", result)
+	msg := fmt.Sprintf("unexpected success response for PostStockCompany: API contract not enforced by server. Client expected to get an error, but got: %T", result)
 	panic(msg)
 }
 

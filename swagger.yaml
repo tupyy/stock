@@ -27,6 +27,7 @@ paths:
           description: "method not allowed"
         500:
           description: "Internal error."
+
   /stock:
     get:
       summary: "get stocks"
@@ -49,16 +50,16 @@ paths:
         500:
           description: "internal error"
 
+  /stock/{company}:
     post:
       summary: "add a new company to crawler"
       produces:
         - "application/json"
       parameters:
-      - name: label
-        in: body
+      - name: company
+        in: path
         required: true
-        schema:
-          $ref: "#/definitions/company"
+        type: string
       responses:
         201:
           description: "created"
@@ -66,6 +67,22 @@ paths:
           description: "bad request"
         500:
           description: "internal error"
+
+    delete:
+      summary: "stop crawling a company"
+      parameters:
+      - name: company
+        in: path
+        required: true
+        type: string
+      responses:
+        200:
+          description: "ok"
+        404:
+          description: "company not found"
+        500:
+          description: "internal error"
+
 definitions:
   stockValue:
     type: object

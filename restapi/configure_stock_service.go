@@ -74,9 +74,21 @@ func configureAPI(api *operations.StockServiceAPI) http.Handler {
 			return middleware.NotImplemented("operation operations.GetStocks has not yet been implemented")
 		})
 	}
-	if api.PostStockHandler == nil {
-		api.PostStockHandler = operations.PostStockHandlerFunc(func(params operations.PostStockParams) middleware.Responder {
-			return middleware.NotImplemented("operation operations.PostStock has not yet been implemented")
+	if api.PostStockCompanyHandler == nil {
+		api.PostStockCompanyHandler = operations.PostStockCompanyHandlerFunc(func(params operations.PostStockCompanyParams) middleware.Responder {
+			crawler.AddCompany(params.Company)
+			return operations.NewPostStockCompanyCreated()
+		})
+	}
+
+	if api.DeleteStockCompanyHandler == nil {
+		api.DeleteStockCompanyHandler = operations.DeleteStockCompanyHandlerFunc(func(params operations.DeleteStockCompanyParams) middleware.Responder {
+			err := crawler.DeleteCompany(params.Company)
+			if err != nil {
+				return operations.NewDeleteStockCompanyNotFound()
+			}
+
+			return operations.NewDeleteStockCompanyOK()
 		})
 	}
 
