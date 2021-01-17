@@ -24,7 +24,8 @@ import (
 //go:generate swagger generate server --target ../../stock-crawler --name StockService --spec ../target/swagger.yaml --principal interface{}
 
 type configurationFlags struct {
-	ConfFile string `short:"c" long:"conf" description:"Path to configuration file" value-name:"FILE"`
+	ConfFile   string `short:"c" long:"conf" description:"Path to configuration file" value-name:"FILE"`
+	OnSchedule bool   `short:"s" long:"on-schedule" description:"Crawl only when the stock is open"`
 }
 
 var confFlags configurationFlags
@@ -61,7 +62,7 @@ func configureAPI(api *operations.StockServiceAPI) http.Handler {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	stockContainer := crawler.Start(ctx)
+	stockContainer := crawler.Start(ctx, confFlags.OnSchedule)
 
 	if api.GetStockHandler == nil {
 		api.GetStockHandler = operations.GetStockHandlerFunc(func(params operations.GetStockParams) middleware.Responder {

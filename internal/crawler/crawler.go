@@ -22,6 +22,8 @@ var (
 	// list of companies labels
 	companies []string
 
+	defaultCanCrawl bool
+
 	workers map[string]*CrawlWorker
 
 	output chan models.StockValue
@@ -29,7 +31,7 @@ var (
 	parentContext context.Context
 )
 
-func Start(ctx context.Context) *StockContainer {
+func Start(ctx context.Context, onSchedule bool) *StockContainer {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
@@ -52,6 +54,7 @@ func Start(ctx context.Context) *StockContainer {
 	}()
 
 	t := config.GetCrawlPeriod()
+	defaultCanCrawl = onSchedule
 
 	companies := config.GetCompanies()
 	if len(companies) == 0 {
@@ -61,7 +64,7 @@ func Start(ctx context.Context) *StockContainer {
 	workers = make(map[string]*CrawlWorker)
 	for _, c := range companies {
 		log.Infof("starting crawler for %s", c)
-		w := NewCrawlWorker(output, t, createCanCrawl())
+		w := NewCrawlWorker(output, t, createCanCrawl(defaultCanCrawl))
 		go w.Run(parentContext, client, c)
 		workers[c] = w
 	}
@@ -70,7 +73,7 @@ func Start(ctx context.Context) *StockContainer {
 }
 
 func AddCompany(company string) {
-	w := NewCrawlWorker(output, 2*time.Second, createCanCrawl())
+	w := NewCrawlWorker(output, 2*time.Second, createCanCrawl(defaultCanCrawl))
 	go w.Run(parentContext, client, company)
 	workers[company] = w
 }
@@ -97,19 +100,25 @@ func Companies() []string {
 }
 
 // return function to schedule crawling.
-func createCanCrawl() canCrawl {
-	return func() bool {
-		now := time.Now()
-
-		// dont crawl in weekends
-		if now.Day() > 4 {
-			return false
-		}
-
-		// crawl between 9 - 18
-		if now.Hour() >= 9 && now.Hour() < 18 {
+func createCanCrawl(onSchedule bool) canCrawl {
+	if !onSchedule {
+		return func() bool {
 			return true
 		}
-		return false
+	} else {
+		return func() bool {
+			now := time.Now()
+
+			// dont crawl in weekends
+			if now.Day() > 4 {
+				return false
+			}
+
+			// crawl between 9 - 18
+			if now.Hour() >= 9 && now.Hour() < 18 {
+				return true
+			}
+			return false
+		}
 	}
 }

@@ -16,6 +16,6 @@ buildah config --port 8080 $container
 #
 # This step is not working properly.
 # Need to run with podman -p 8000:8000 --entrypoint /bin/restest restest:latest
-buildah config --entrypoint '["/bin/server","--host=localhost","--port=8080",""--conf=./config.yaml"]'  $container
+buildah config --entrypoint '["/bin/server","--host=localhost","--port=8080","--conf=./config.yaml","-s"]'  $container
 buildah commit $container $1
 
