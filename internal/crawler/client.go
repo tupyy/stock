@@ -1,17 +1,19 @@
 package crawler
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
 
 	"io/ioutil"
 
 	"github.com/buger/jsonparser"
+	"github.com/tupyy/stock/internal/config"
 	"github.com/tupyy/stock/models"
 )
 
-func createUrl(company string) string {
-	return fmt.Sprintf("%s?symbol=1rP%s&period=-1", api, company)
+func createUrl(baseUrl, company string) string {
+	return fmt.Sprintf("%s?symbol=1rP%s&period=-1", baseUrl, company)
 }
 
 func doRequest(client *http.Client, url string) ([]byte, error) {
@@ -36,7 +38,13 @@ func doRequest(client *http.Client, url string) ([]byte, error) {
 }
 
 func getStock(client *http.Client, company string) (models.StockValue, error) {
-	data, err := doRequest(client, createUrl(company))
+
+	baseUrl := config.GetServerBaseUrl()
+	if len(baseUrl) == 0 {
+		return models.StockValue{}, errors.New("server base url not  found")
+	}
+
+	data, err := doRequest(client, createUrl(baseUrl, company))
 	if err != nil {
 		return models.StockValue{}, err
 	}

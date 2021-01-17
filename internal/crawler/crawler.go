@@ -8,11 +8,8 @@ import (
 	"time"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/tupyy/stock/internal/config"
 	"github.com/tupyy/stock/models"
-)
-
-const (
-	api = "https://www.boursorama.com/bourse/action/graph/ws/UpdateCharts"
 )
 
 // return true if the crawler is allowed to crawl
@@ -32,7 +29,7 @@ var (
 	parentContext context.Context
 )
 
-func Start(ctx context.Context, companies []string) *StockContainer {
+func Start(ctx context.Context) *StockContainer {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
@@ -54,7 +51,13 @@ func Start(ctx context.Context, companies []string) *StockContainer {
 		}
 	}()
 
-	t := 2 * time.Second
+	t := config.GetCrawlPeriod()
+
+	companies := config.GetCompanies()
+	if len(companies) == 0 {
+		log.Warn("no companies defined")
+	}
+
 	workers = make(map[string]*CrawlWorker)
 	for _, c := range companies {
 		log.Infof("starting crawler for %s", c)

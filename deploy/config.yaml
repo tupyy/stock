@@ -1,0 +1,13 @@
+# Default configuration
+
+stockServerUrl: "https://www.boursorama.com/bourse/action/graph/ws/UpdateCharts"
+
+# seconds
+crawlPeriod: 2
+
+companies:
+- AIR
+- RNO
+- AF
+
+

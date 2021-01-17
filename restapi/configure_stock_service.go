@@ -11,7 +11,9 @@ import (
 	"github.com/go-openapi/errors"
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
+	"github.com/go-openapi/swag"
 
+	"github.com/tupyy/stock/internal/config"
 	"github.com/tupyy/stock/internal/crawler"
 	"github.com/tupyy/stock/models"
 	"github.com/tupyy/stock/restapi/operations"
@@ -21,8 +23,20 @@ import (
 
 //go:generate swagger generate server --target ../../stock-crawler --name StockService --spec ../target/swagger.yaml --principal interface{}
 
+type configurationFlags struct {
+	ConfFile string `short:"c" long:"conf" description:"Path to configuration file" value-name:"FILE"`
+}
+
+var confFlags configurationFlags
+
 func configureFlags(api *operations.StockServiceAPI) {
-	// api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{ ... }
+
+	api.CommandLineOptionsGroups = []swag.CommandLineOptionsGroup{
+		{
+			ShortDescription: "Configuration Options",
+			Options:          &confFlags,
+		},
+	}
 }
 
 func configureAPI(api *operations.StockServiceAPI) http.Handler {
@@ -46,7 +60,8 @@ func configureAPI(api *operations.StockServiceAPI) http.Handler {
 	api.JSONProducer = runtime.JSONProducer()
 
 	ctx, cancel := context.WithCancel(context.Background())
-	stockContainer := crawler.Start(ctx, []string{"AIR", "RNO"})
+
+	stockContainer := crawler.Start(ctx)
 
 	if api.GetStockHandler == nil {
 		api.GetStockHandler = operations.GetStockHandlerFunc(func(params operations.GetStockParams) middleware.Responder {
@@ -131,6 +146,8 @@ func configureGlobal() {
 	// Set log output
 	log.SetOutput(os.Stdout)
 	log.SetFormatter(&log.TextFormatter{})
+
+	config.ParseConfiguration(confFlags.ConfFile)
 
 	log.SetLevel(log.InfoLevel)
 	if os.Getenv("DEBUG") == "1" {
