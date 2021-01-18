@@ -12,9 +12,6 @@ import (
 type CrawlWorker struct {
 	done chan struct{}
 
-	// return true if it ok to crawl
-	c canCrawl
-
 	// interval of crawling
 	tick time.Duration
 
@@ -22,10 +19,9 @@ type CrawlWorker struct {
 	output chan models.StockValue
 }
 
-func NewCrawlWorker(output chan models.StockValue, tick time.Duration, c canCrawl) *CrawlWorker {
+func NewCrawlWorker(output chan models.StockValue, tick time.Duration) *CrawlWorker {
 	return &CrawlWorker{
 		done:   make(chan struct{}),
-		c:      c,
 		tick:   tick,
 		output: output,
 	}
@@ -46,16 +42,12 @@ func (c *CrawlWorker) Run(ctx context.Context, client *http.Client, company stri
 			log.Info("exit from crawler")
 			return
 		case <-time.After(c.tick):
-			if c.c() {
-				val, err := getStock(client, company)
-				if err != nil {
-					log.Errorf("error getting stock %v", err)
-				} else {
-					log.Debugf("stock :%+v", val)
-					c.output <- val
-				}
+			val, err := getStock(client, company)
+			if err != nil {
+				log.Errorf("error getting stock %v", err)
 			} else {
-				log.Debug("cannot crawl")
+				log.Debugf("stock :%+v", val)
+				c.output <- val
 			}
 		}
 

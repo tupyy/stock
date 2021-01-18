@@ -15,7 +15,9 @@ require (
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
 	github.com/izumin5210/gex v0.6.1
 	github.com/jessevdk/go-flags v1.4.0
+	github.com/mitchellh/go-homedir v1.1.0
 	github.com/sirupsen/logrus v1.4.2
-	github.com/spf13/cobra v1.1.1 // indirect
+	github.com/spf13/cobra v1.1.1
+	github.com/spf13/viper v1.7.0
 	golang.org/x/net v0.0.0-20201224014010-6772e930b67b
 )

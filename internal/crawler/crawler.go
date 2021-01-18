@@ -12,11 +12,7 @@ import (
 	"github.com/tupyy/stock/models"
 )
 
-// return true if the crawler is allowed to crawl
-// it is used to stop crawling when the stock market is closed
-type canCrawl func() bool
-
-var (
+type Crawler struct {
 	client *http.Client
 
 	// list of companies labels
@@ -28,97 +24,96 @@ var (
 
 	output chan models.StockValue
 
-	parentContext context.Context
-)
+	stocks *StockContainer
 
-func Start(ctx context.Context, onSchedule bool) *StockContainer {
+	crawlersCancelFunc context.CancelFunc
+
+	crawlerContext context.Context
+}
+
+func NewCrawler() *Crawler {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
-	client = &http.Client{Transport: tr}
-	stocks := newStocks()
 
-	parentContext = ctx
-	output = make(chan models.StockValue)
+	return &Crawler{
+		client:  &http.Client{Transport: tr},
+		output:  make(chan models.StockValue),
+		workers: make(map[string]*CrawlWorker),
+		stocks:  newStocks(),
+	}
+}
+func (c *Crawler) Start(ctx context.Context) *StockContainer {
+	c.crawlerContext, c.crawlersCancelFunc = context.WithCancel(ctx)
+
 	go func() {
 		for {
 			select {
-			case <-ctx.Done():
+			case <-c.crawlerContext.Done():
 				log.Info("context closed")
 				return
-			case v := <-output:
+			case v := <-c.output:
 				log.Debug("stock saved")
-				stocks.addStockValue(v)
+				c.stocks.addStockValue(v)
 			}
 		}
 	}()
 
 	t := config.GetCrawlPeriod()
-	defaultCanCrawl = onSchedule
 
 	companies := config.GetCompanies()
 	if len(companies) == 0 {
 		log.Warn("no companies defined")
 	}
 
-	workers = make(map[string]*CrawlWorker)
-	for _, c := range companies {
-		log.Infof("starting crawler for %s", c)
-		w := NewCrawlWorker(output, t, createCanCrawl(defaultCanCrawl))
-		go w.Run(parentContext, client, c)
-		workers[c] = w
+	for _, company := range companies {
+		log.Infof("starting crawler for %s", company)
+		w := NewCrawlWorker(c.output, t)
+		go w.Run(c.crawlerContext, c.client, company)
+		c.workers[company] = w
 	}
 
-	return stocks
+	return c.stocks
 }
 
-func AddCompany(company string) {
-	w := NewCrawlWorker(output, 2*time.Second, createCanCrawl(defaultCanCrawl))
-	go w.Run(parentContext, client, company)
-	workers[company] = w
+func (c *Crawler) Stop() {
+	for _, company := range c.Companies() {
+		c.DeleteCompany(company)
+	}
+	c.crawlersCancelFunc()
 }
 
-func DeleteCompany(company string) error {
-	if w, ok := workers[company]; ok {
+func (c *Crawler) GetStockContainer() *StockContainer {
+	return c.stocks
+}
+
+func (c *Crawler) IsRunning() bool {
+	return len(c.workers) != 0
+}
+
+func (c *Crawler) AddCompany(company string) {
+	w := NewCrawlWorker(c.output, 2*time.Second)
+	go w.Run(c.crawlerContext, c.client, company)
+	c.workers[company] = w
+}
+
+func (c *Crawler) DeleteCompany(company string) error {
+	if w, ok := c.workers[company]; ok {
 		log.Infof("remove worker for company '%s'", company)
 		w.Shutdown()
 		w = nil
-		delete(workers, company)
+		delete(c.workers, company)
 		return nil
 	}
 
 	return errors.New("company not found")
 }
 
-func Companies() []string {
+func (c *Crawler) Companies() []string {
 	var companies []string
-	for k := range workers {
+	for k := range c.workers {
 		companies = append(companies, k)
 	}
 
 	return companies
-}
-
-// return function to schedule crawling.
-func createCanCrawl(onSchedule bool) canCrawl {
-	if !onSchedule {
-		return func() bool {
-			return true
-		}
-	} else {
-		return func() bool {
-			now := time.Now()
-
-			// dont crawl in weekends
-			if now.Weekday() != time.Saturday || now.Weekday() != time.Sunday {
-				return false
-			}
-
-			// crawl between 9 - 18
-			if now.Hour() >= 9 && now.Hour() < 18 {
-				return true
-			}
-			return false
-		}
-	}
 }
