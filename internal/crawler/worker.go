@@ -9,11 +9,8 @@ import (
 	"github.com/tupyy/stock/models"
 )
 
-type CrawlWorker struct {
+type crawlWorker struct {
 	done chan struct{}
-
-	// return true if it ok to crawl
-	c canCrawl
 
 	// interval of crawling
 	tick time.Duration
@@ -22,20 +19,19 @@ type CrawlWorker struct {
 	output chan models.StockValue
 }
 
-func NewCrawlWorker(output chan models.StockValue, tick time.Duration, c canCrawl) *CrawlWorker {
-	return &CrawlWorker{
+func newcrawlWorker(output chan models.StockValue, tick time.Duration) *crawlWorker {
+	return &crawlWorker{
 		done:   make(chan struct{}),
-		c:      c,
 		tick:   tick,
 		output: output,
 	}
 }
 
-func (c *CrawlWorker) Shutdown() {
+func (c *crawlWorker) Shutdown() {
 	c.done <- struct{}{}
 }
 
-func (c *CrawlWorker) Run(ctx context.Context, client *http.Client, company string) {
+func (c *crawlWorker) Run(ctx context.Context, client *http.Client, company string) {
 	log.Infof("start crawling for '%s'", company)
 	for {
 		select {
@@ -46,16 +42,12 @@ func (c *CrawlWorker) Run(ctx context.Context, client *http.Client, company stri
 			log.Info("exit from crawler")
 			return
 		case <-time.After(c.tick):
-			if c.c() {
-				val, err := getStock(client, company)
-				if err != nil {
-					log.Errorf("error getting stock %v", err)
-				} else {
-					log.Debugf("stock :%+v", val)
-					c.output <- val
-				}
+			val, err := getStock(client, company)
+			if err != nil {
+				log.Errorf("error getting stock %v", err)
 			} else {
-				log.Debug("cannot crawl")
+				log.Debugf("stock :%+v", val)
+				c.output <- val
 			}
 		}
 

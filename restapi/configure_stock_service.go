@@ -29,6 +29,7 @@ type configurationFlags struct {
 }
 
 var confFlags configurationFlags
+var c *crawler.Crawler
 
 func configureFlags(api *operations.StockServiceAPI) {
 
@@ -62,7 +63,10 @@ func configureAPI(api *operations.StockServiceAPI) http.Handler {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	stockContainer := crawler.Start(ctx, confFlags.OnSchedule)
+	c := crawler.NewCrawler()
+	scheduler := crawler.NewScheduler(c)
+	stockContainer := c.GetStockContainer()
+	scheduler.Run(ctx)
 
 	if api.GetStockHandler == nil {
 		api.GetStockHandler = operations.GetStockHandlerFunc(func(params operations.GetStockParams) middleware.Responder {
@@ -87,21 +91,21 @@ func configureAPI(api *operations.StockServiceAPI) http.Handler {
 	}
 	if api.GetStocksHandler == nil {
 		api.GetStocksHandler = operations.GetStocksHandlerFunc(func(params operations.GetStocksParams) middleware.Responder {
-			payload := &operations.GetStocksOKBody{Companies: crawler.Companies()}
+			payload := &operations.GetStocksOKBody{Companies: c.Companies()}
 
 			return operations.NewGetStocksOK().WithPayload(payload)
 		})
 	}
 	if api.PostStockCompanyHandler == nil {
 		api.PostStockCompanyHandler = operations.PostStockCompanyHandlerFunc(func(params operations.PostStockCompanyParams) middleware.Responder {
-			crawler.AddCompany(params.Company)
+			c.AddCompany(params.Company)
 			return operations.NewPostStockCompanyCreated()
 		})
 	}
 
 	if api.DeleteStockCompanyHandler == nil {
 		api.DeleteStockCompanyHandler = operations.DeleteStockCompanyHandlerFunc(func(params operations.DeleteStockCompanyParams) middleware.Responder {
-			err := crawler.DeleteCompany(params.Company)
+			err := c.DeleteCompany(params.Company)
 			if err != nil {
 				return operations.NewDeleteStockCompanyNotFound()
 			}

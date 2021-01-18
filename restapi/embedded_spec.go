@@ -28,7 +28,7 @@ func init() {
   "info": {
     "description": "This API provide the recent stock value",
     "title": "stock service",
-    "version": "0.2"
+    "version": "0.5"
   },
   "paths": {
     "/stock": {
@@ -218,7 +218,7 @@ func init() {
   "info": {
     "description": "This API provide the recent stock value",
     "title": "stock service",
-    "version": "0.2"
+    "version": "0.5"
   },
   "paths": {
     "/stock": {
