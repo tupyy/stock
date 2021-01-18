@@ -20,7 +20,7 @@ type Crawler struct {
 
 	defaultCanCrawl bool
 
-	workers map[string]*CrawlWorker
+	workers map[string]*crawlWorker
 
 	output chan models.StockValue
 
@@ -39,7 +39,7 @@ func NewCrawler() *Crawler {
 	return &Crawler{
 		client:  &http.Client{Transport: tr},
 		output:  make(chan models.StockValue),
-		workers: make(map[string]*CrawlWorker),
+		workers: make(map[string]*crawlWorker),
 		stocks:  newStocks(),
 	}
 }
@@ -68,7 +68,7 @@ func (c *Crawler) Start(ctx context.Context) *StockContainer {
 
 	for _, company := range companies {
 		log.Infof("starting crawler for %s", company)
-		w := NewCrawlWorker(c.output, t)
+		w := newcrawlWorker(c.output, t)
 		go w.Run(c.crawlerContext, c.client, company)
 		c.workers[company] = w
 	}
@@ -92,7 +92,7 @@ func (c *Crawler) IsRunning() bool {
 }
 
 func (c *Crawler) AddCompany(company string) {
-	w := NewCrawlWorker(c.output, 2*time.Second)
+	w := newcrawlWorker(c.output, 2*time.Second)
 	go w.Run(c.crawlerContext, c.client, company)
 	c.workers[company] = w
 }

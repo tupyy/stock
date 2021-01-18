@@ -9,7 +9,7 @@ import (
 	"github.com/tupyy/stock/models"
 )
 
-type CrawlWorker struct {
+type crawlWorker struct {
 	done chan struct{}
 
 	// interval of crawling
@@ -19,19 +19,19 @@ type CrawlWorker struct {
 	output chan models.StockValue
 }
 
-func NewCrawlWorker(output chan models.StockValue, tick time.Duration) *CrawlWorker {
-	return &CrawlWorker{
+func newcrawlWorker(output chan models.StockValue, tick time.Duration) *crawlWorker {
+	return &crawlWorker{
 		done:   make(chan struct{}),
 		tick:   tick,
 		output: output,
 	}
 }
 
-func (c *CrawlWorker) Shutdown() {
+func (c *crawlWorker) Shutdown() {
 	c.done <- struct{}{}
 }
 
-func (c *CrawlWorker) Run(ctx context.Context, client *http.Client, company string) {
+func (c *crawlWorker) Run(ctx context.Context, client *http.Client, company string) {
 	log.Infof("start crawling for '%s'", company)
 	for {
 		select {
