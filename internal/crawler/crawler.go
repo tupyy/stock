@@ -110,7 +110,7 @@ func createCanCrawl(onSchedule bool) canCrawl {
 			now := time.Now()
 
 			// dont crawl in weekends
-			if now.Day() > 4 {
+			if now.Weekday() != time.Saturday || now.Weekday() != time.Sunday {
 				return false
 			}
 

@@ -16,5 +16,6 @@ require (
 	github.com/izumin5210/gex v0.6.1
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/sirupsen/logrus v1.4.2
+	github.com/spf13/cobra v1.1.1 // indirect
 	golang.org/x/net v0.0.0-20201224014010-6772e930b67b
 )
