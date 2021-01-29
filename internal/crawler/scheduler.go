@@ -15,6 +15,7 @@ func NewScheduler(crawler *Crawler) *Scheduler {
 }
 
 func (s *Scheduler) Run(ctx context.Context) {
+	log.Info("start scheduler")
 	go func() {
 		ticker := time.NewTicker(2 * time.Second)
 		defer ticker.Stop()

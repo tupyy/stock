@@ -31,7 +31,7 @@ type Crawler struct {
 	crawlerContext context.Context
 }
 
-func NewCrawler() *Crawler {
+func NewCawler() *Crawler {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
@@ -43,7 +43,7 @@ func NewCrawler() *Crawler {
 		stocks:  newStocks(),
 	}
 }
-func (c *Crawler) Start(ctx context.Context) *StockContainer {
+func (c *Crawler) Start(ctx context.Context) {
 	c.crawlerContext, c.crawlersCancelFunc = context.WithCancel(ctx)
 
 	go func() {
@@ -72,8 +72,6 @@ func (c *Crawler) Start(ctx context.Context) *StockContainer {
 		go w.Run(c.crawlerContext, c.client, company)
 		c.workers[company] = w
 	}
-
-	return c.stocks
 }
 
 func (c *Crawler) Stop() {

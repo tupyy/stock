@@ -16,9 +16,20 @@ limitations under the License.
 package cmd
 
 import (
+	"context"
 	"fmt"
+	"os"
+	"os/signal"
+	"strings"
+	"sync"
+	"syscall"
+	"time"
 
+	"github.com/go-openapi/strfmt"
+	"github.com/guptarohit/asciigraph"
 	"github.com/spf13/cobra"
+	"github.com/tupyy/stock/client"
+	"github.com/tupyy/stock/client/operations"
 )
 
 // plotCmd represents the plot command
@@ -32,7 +43,62 @@ Cobra is a CLI library for Go that empowers applications.
 This application is a tool to generate the needed files
 to quickly create a Cobra application.`,
 	Run: func(cmd *cobra.Command, args []string) {
-		fmt.Println("plot called")
+		if len(args) < 2 {
+			fmt.Printf("arguments missing")
+			return
+		}
+
+		client := client.NewHTTPClientWithConfig(strfmt.Default, &client.TransportConfig{Host: "localhost:18080"})
+
+		interruptChan := make(chan os.Signal, 1)
+		signal.Notify(interruptChan, syscall.SIGINT, syscall.SIGTERM)
+
+		ctx, cancel := context.WithCancel(context.Background())
+		go func() {
+			for range interruptChan {
+				cancel()
+			}
+		}()
+
+		// save position
+		fmt.Print("\033[s")
+
+		var wg sync.WaitGroup
+
+		wg.Add(1)
+		go func() {
+
+			var values []float64
+			var lastValue float64
+			ticker := time.NewTicker(2 * time.Second)
+			defer ticker.Stop()
+			defer wg.Done()
+			for {
+				select {
+				default:
+					params := operations.NewGetStockParams()
+					label := strings.ToUpper(args[1])
+					params.Label = &label
+
+					stockValues, err := client.Operations.GetStock(params)
+					if err == nil {
+						currValue := stockValues.Payload.Values[0].Value
+						if currValue != lastValue {
+							lastValue = currValue
+							values = append(values, currValue)
+							graph := asciigraph.Plot(values)
+
+							fmt.Print("\033[u\033[K")
+							fmt.Println(graph)
+						}
+					}
+				case <-ctx.Done():
+					return
+				}
+			}
+		}()
+
+		wg.Wait()
 	},
 }
 

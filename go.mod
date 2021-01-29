@@ -13,6 +13,7 @@ require (
 	github.com/go-openapi/validate v0.20.0
 	github.com/go-swagger/go-swagger v0.25.0
 	github.com/golang/glog v0.0.0-20160126235308-23def4e6c14b // indirect
+	github.com/guptarohit/asciigraph v0.5.1
 	github.com/izumin5210/gex v0.6.1
 	github.com/jessevdk/go-flags v1.4.0
 	github.com/mitchellh/go-homedir v1.1.0

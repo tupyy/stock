@@ -63,10 +63,11 @@ func configureAPI(api *operations.StockServiceAPI) http.Handler {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	c := crawler.NewCrawler()
-	scheduler := crawler.NewScheduler(c)
+	c := crawler.NewCawler()
 	stockContainer := c.GetStockContainer()
+	scheduler := crawler.NewScheduler(c)
 	scheduler.Run(ctx)
+	c.Start(ctx)
 
 	if api.GetStockHandler == nil {
 		api.GetStockHandler = operations.GetStockHandlerFunc(func(params operations.GetStockParams) middleware.Responder {
