@@ -12,6 +12,11 @@ import (
 	"github.com/tupyy/stock/models"
 )
 
+// Repo is the interface of a stock repo
+type Repo interface {
+	Add(value models.StockValue)
+}
+
 type Crawler struct {
 	client *http.Client
 
@@ -24,23 +29,23 @@ type Crawler struct {
 
 	output chan models.StockValue
 
-	stocks *StockContainer
+	stockRepo Repo
 
 	crawlersCancelFunc context.CancelFunc
 
 	crawlerContext context.Context
 }
 
-func NewCawler() *Crawler {
+func NewCawler(stockRepo Repo) *Crawler {
 	tr := &http.Transport{
 		TLSClientConfig: &tls.Config{InsecureSkipVerify: true},
 	}
 
 	return &Crawler{
-		client:  &http.Client{Transport: tr},
-		output:  make(chan models.StockValue),
-		workers: make(map[string]*crawlWorker),
-		stocks:  newStocks(),
+		client:    &http.Client{Transport: tr},
+		output:    make(chan models.StockValue),
+		workers:   make(map[string]*crawlWorker),
+		stockRepo: stockRepo,
 	}
 }
 func (c *Crawler) Start(ctx context.Context) {
@@ -54,7 +59,7 @@ func (c *Crawler) Start(ctx context.Context) {
 				return
 			case v := <-c.output:
 				log.Debug("stock saved")
-				c.stocks.addStockValue(v)
+				c.stockRepo.Add(v)
 			}
 		}
 	}()
@@ -79,10 +84,6 @@ func (c *Crawler) Stop() {
 		c.DeleteCompany(company)
 	}
 	c.crawlersCancelFunc()
-}
-
-func (c *Crawler) GetStockContainer() *StockContainer {
-	return c.stocks
 }
 
 func (c *Crawler) IsRunning() bool {

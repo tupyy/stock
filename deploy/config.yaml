@@ -2,6 +2,8 @@
 
 stockServerUrl: "https://www.boursorama.com/bourse/action/graph/ws/UpdateCharts"
 
+redisURL: "localhost:6379"
+
 # seconds
 crawlPeriod: 2
 

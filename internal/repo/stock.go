@@ -1,4 +1,4 @@
-package crawler
+package repo
 
 import (
 	"fmt"
@@ -7,25 +7,25 @@ import (
 	"github.com/tupyy/stock/models"
 )
 
-type StockContainer struct {
+type DeprecatedStockRepo struct {
 	stocks map[string]models.StockValue
 	lock   sync.Mutex
 }
 
-func newStocks() *StockContainer {
-	return &StockContainer{
+func newDeprecatedStockRepo() *DeprecatedStockRepo {
+	return &DeprecatedStockRepo{
 		stocks: make(map[string]models.StockValue),
 	}
 }
 
-func (s *StockContainer) addStockValue(stockValue models.StockValue) {
+func (s *DeprecatedStockRepo) Add(stockValue models.StockValue) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
 	s.stocks[stockValue.Label] = stockValue
 }
 
-func (s *StockContainer) GetStock(label string) (models.StockValue, error) {
+func (s *DeprecatedStockRepo) GetStock(label string) (models.StockValue, error) {
 	s.lock.Lock()
 	defer s.lock.Unlock()
 
@@ -37,7 +37,7 @@ func (s *StockContainer) GetStock(label string) (models.StockValue, error) {
 	return v, nil
 }
 
-func (s *StockContainer) GetStocks() (count int64, values []*models.StockValue) {
+func (s *DeprecatedStockRepo) GetLatestStocks() (count int64, values []*models.StockValue) {
 	count = int64(len(s.stocks))
 
 	for _, v := range s.stocks {

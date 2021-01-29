@@ -11,7 +11,7 @@ produces:
   - "application/json"
 
 paths:
-  /stocks:
+  /companies:
     get:
       summary: "List all followed companies"
       produces:
@@ -88,6 +88,24 @@ paths:
         500:
           description: "internal error"
 
+  /stocks/{company}:
+    get:
+      summary: "get daily stock values for a company"
+      produces:
+        - "application/json"
+      parameters:
+      - name: company
+        in: path
+        required: true
+        type: string
+      responses:
+        200:
+          description: "ok"
+          schema:
+            $ref: "#/definitions/stockValues"
+        404:
+          description: "company not found"
+
 definitions:
   stockValue:
     type: object
@@ -127,5 +145,19 @@ definitions:
       label:
         type: string
         description: stock label 
+
+  stockValues:
+    type: object
+    properties:
+      label:
+        type: string
+        description: stock label
+      count:
+        type: integer
+        description: number of values
+      values:
+        type: array
+        items:
+          type: number
 
 

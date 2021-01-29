@@ -12,9 +12,11 @@ import (
 	"github.com/go-openapi/runtime"
 	"github.com/go-openapi/runtime/middleware"
 	"github.com/go-openapi/swag"
+	"github.com/go-redis/redis"
 
 	"github.com/tupyy/stock/internal/config"
 	"github.com/tupyy/stock/internal/crawler"
+	"github.com/tupyy/stock/internal/repo"
 	"github.com/tupyy/stock/models"
 	"github.com/tupyy/stock/restapi/operations"
 
@@ -63,8 +65,19 @@ func configureAPI(api *operations.StockServiceAPI) http.Handler {
 
 	ctx, cancel := context.WithCancel(context.Background())
 
-	c := crawler.NewCawler()
-	stockContainer := c.GetStockContainer()
+	rdb := redis.NewClient(&redis.Options{
+		Addr:     config.GetRedisUrl(), // use default Addr
+		Password: "",                   // no password set
+		DB:       0,                    // use default DB
+	})
+	_, err := rdb.Ping().Result()
+	if err != nil {
+		log.Fatal(err)
+	}
+	log.Infof("connected to redis %s", config.GetRedisUrl())
+
+	redisRepo := repo.NewStockRedisRepo(rdb)
+	c := crawler.NewCawler(redisRepo)
 	scheduler := crawler.NewScheduler(c)
 	scheduler.Run(ctx)
 	c.Start(ctx)
@@ -73,7 +86,7 @@ func configureAPI(api *operations.StockServiceAPI) http.Handler {
 		api.GetStockHandler = operations.GetStockHandlerFunc(func(params operations.GetStockParams) middleware.Responder {
 			payload := models.Stock{}
 			if params.Label != nil {
-				s, err := stockContainer.GetStock(*params.Label)
+				s, err := redisRepo.GetStock(*params.Label)
 				if err != nil {
 					return operations.NewGetStockNotFound()
 				}
@@ -83,18 +96,18 @@ func configureAPI(api *operations.StockServiceAPI) http.Handler {
 				return operations.NewGetStockOK().WithPayload(&payload)
 			}
 
-			payload.Count, payload.Values = stockContainer.GetStocks()
+			payload.Count, payload.Values = redisRepo.GetLatestStocks()
 			if payload.Count == 0 {
 				return &operations.GetStockOK{}
 			}
 			return operations.NewGetStockOK().WithPayload(&payload)
 		})
 	}
-	if api.GetStocksHandler == nil {
-		api.GetStocksHandler = operations.GetStocksHandlerFunc(func(params operations.GetStocksParams) middleware.Responder {
-			payload := &operations.GetStocksOKBody{Companies: c.Companies()}
+	if api.GetCompaniesHandler == nil {
+		api.GetCompaniesHandler = operations.GetCompaniesHandlerFunc(func(params operations.GetCompaniesParams) middleware.Responder {
+			payload := &operations.GetCompaniesOKBody{Companies: c.Companies()}
 
-			return operations.NewGetStocksOK().WithPayload(payload)
+			return operations.NewGetCompaniesOK().WithPayload(payload)
 		})
 	}
 	if api.PostStockCompanyHandler == nil {
@@ -112,6 +125,18 @@ func configureAPI(api *operations.StockServiceAPI) http.Handler {
 			}
 
 			return operations.NewDeleteStockCompanyOK()
+		})
+	}
+
+	if api.GetStocksCompanyHandler == nil {
+		api.GetStocksCompanyHandler = operations.GetStocksCompanyHandlerFunc(func(params operations.GetStocksCompanyParams) middleware.Responder {
+			payload, err := redisRepo.GetStocks(params.Company)
+			if err != nil {
+				return operations.NewGetStocksCompanyNotFound()
+			}
+
+			return operations.NewGetStocksCompanyOK().WithPayload(&payload)
+
 		})
 	}
 

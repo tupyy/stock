@@ -31,6 +31,39 @@ func init() {
     "version": "0.5"
   },
   "paths": {
+    "/companies": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "summary": "List all followed companies",
+        "responses": {
+          "200": {
+            "description": "ok",
+            "schema": {
+              "type": "object",
+              "required": [
+                "companies"
+              ],
+              "properties": {
+                "companies": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "method not allowed"
+          },
+          "500": {
+            "description": "Internal error."
+          }
+        }
+      }
+    },
     "/stock": {
       "get": {
         "produces": [
@@ -113,35 +146,29 @@ func init() {
         }
       }
     },
-    "/stocks": {
+    "/stocks/{company}": {
       "get": {
         "produces": [
           "application/json"
         ],
-        "summary": "List all followed companies",
+        "summary": "get daily stock values for a company",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "company",
+            "in": "path",
+            "required": true
+          }
+        ],
         "responses": {
           "200": {
             "description": "ok",
             "schema": {
-              "type": "object",
-              "required": [
-                "companies"
-              ],
-              "properties": {
-                "companies": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              }
+              "$ref": "#/definitions/stockValues"
             }
           },
-          "402": {
-            "description": "method not allowed"
-          },
-          "500": {
-            "description": "Internal error."
+          "404": {
+            "description": "company not found"
           }
         }
       }
@@ -202,6 +229,25 @@ func init() {
         "variation": {
           "description": "value of the daily variation of the stock value",
           "type": "number"
+        }
+      }
+    },
+    "stockValues": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "description": "number of values",
+          "type": "integer"
+        },
+        "label": {
+          "description": "stock label",
+          "type": "string"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
         }
       }
     }
@@ -221,6 +267,39 @@ func init() {
     "version": "0.5"
   },
   "paths": {
+    "/companies": {
+      "get": {
+        "produces": [
+          "application/json"
+        ],
+        "summary": "List all followed companies",
+        "responses": {
+          "200": {
+            "description": "ok",
+            "schema": {
+              "type": "object",
+              "required": [
+                "companies"
+              ],
+              "properties": {
+                "companies": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          },
+          "402": {
+            "description": "method not allowed"
+          },
+          "500": {
+            "description": "Internal error."
+          }
+        }
+      }
+    },
     "/stock": {
       "get": {
         "produces": [
@@ -303,35 +382,29 @@ func init() {
         }
       }
     },
-    "/stocks": {
+    "/stocks/{company}": {
       "get": {
         "produces": [
           "application/json"
         ],
-        "summary": "List all followed companies",
+        "summary": "get daily stock values for a company",
+        "parameters": [
+          {
+            "type": "string",
+            "name": "company",
+            "in": "path",
+            "required": true
+          }
+        ],
         "responses": {
           "200": {
             "description": "ok",
             "schema": {
-              "type": "object",
-              "required": [
-                "companies"
-              ],
-              "properties": {
-                "companies": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                }
-              }
+              "$ref": "#/definitions/stockValues"
             }
           },
-          "402": {
-            "description": "method not allowed"
-          },
-          "500": {
-            "description": "Internal error."
+          "404": {
+            "description": "company not found"
           }
         }
       }
@@ -392,6 +465,25 @@ func init() {
         "variation": {
           "description": "value of the daily variation of the stock value",
           "type": "number"
+        }
+      }
+    },
+    "stockValues": {
+      "type": "object",
+      "properties": {
+        "count": {
+          "description": "number of values",
+          "type": "integer"
+        },
+        "label": {
+          "description": "stock label",
+          "type": "string"
+        },
+        "values": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
         }
       }
     }

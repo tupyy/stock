@@ -14,6 +14,8 @@ const (
 	// base url for stock server (i.e. boursarama)
 	stockServerURL = "stockServerURL"
 
+	redisURL = "redisURL"
+
 	companies = "companies"
 
 	crawlPeriod = "crawlPeriod"
@@ -46,6 +48,10 @@ func GetServerBaseUrl() string {
 
 func GetCompanies() []string {
 	return viper.GetStringSlice(companies)
+}
+
+func GetRedisUrl() string {
+	return viper.GetString(redisURL)
 }
 
 func GetCrawlPeriod() time.Duration {

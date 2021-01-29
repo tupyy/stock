@@ -77,10 +77,12 @@ type StockServiceAPI struct {
 
 	// DeleteStockCompanyHandler sets the operation handler for the delete stock company operation
 	DeleteStockCompanyHandler DeleteStockCompanyHandler
+	// GetCompaniesHandler sets the operation handler for the get companies operation
+	GetCompaniesHandler GetCompaniesHandler
 	// GetStockHandler sets the operation handler for the get stock operation
 	GetStockHandler GetStockHandler
-	// GetStocksHandler sets the operation handler for the get stocks operation
-	GetStocksHandler GetStocksHandler
+	// GetStocksCompanyHandler sets the operation handler for the get stocks company operation
+	GetStocksCompanyHandler GetStocksCompanyHandler
 	// PostStockCompanyHandler sets the operation handler for the post stock company operation
 	PostStockCompanyHandler PostStockCompanyHandler
 	// ServeError is called when an error is received, there is a default handler
@@ -162,11 +164,14 @@ func (o *StockServiceAPI) Validate() error {
 	if o.DeleteStockCompanyHandler == nil {
 		unregistered = append(unregistered, "DeleteStockCompanyHandler")
 	}
+	if o.GetCompaniesHandler == nil {
+		unregistered = append(unregistered, "GetCompaniesHandler")
+	}
 	if o.GetStockHandler == nil {
 		unregistered = append(unregistered, "GetStockHandler")
 	}
-	if o.GetStocksHandler == nil {
-		unregistered = append(unregistered, "GetStocksHandler")
+	if o.GetStocksCompanyHandler == nil {
+		unregistered = append(unregistered, "GetStocksCompanyHandler")
 	}
 	if o.PostStockCompanyHandler == nil {
 		unregistered = append(unregistered, "PostStockCompanyHandler")
@@ -266,11 +271,15 @@ func (o *StockServiceAPI) initHandlerCache() {
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
+	o.handlers["GET"]["/companies"] = NewGetCompanies(o.context, o.GetCompaniesHandler)
+	if o.handlers["GET"] == nil {
+		o.handlers["GET"] = make(map[string]http.Handler)
+	}
 	o.handlers["GET"]["/stock"] = NewGetStock(o.context, o.GetStockHandler)
 	if o.handlers["GET"] == nil {
 		o.handlers["GET"] = make(map[string]http.Handler)
 	}
-	o.handlers["GET"]["/stocks"] = NewGetStocks(o.context, o.GetStocksHandler)
+	o.handlers["GET"]["/stocks/{company}"] = NewGetStocksCompany(o.context, o.GetStocksCompanyHandler)
 	if o.handlers["POST"] == nil {
 		o.handlers["POST"] = make(map[string]http.Handler)
 	}
