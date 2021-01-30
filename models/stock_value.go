@@ -18,6 +18,12 @@ type StockValue struct {
 	// company label
 	Label string `json:"label,omitempty"`
 
+	// maximum value of the day
+	Max float64 `json:"max,omitempty"`
+
+	// minimum value of the day
+	Min float64 `json:"min,omitempty"`
+
 	// value of the stock company
 	Value float64 `json:"value,omitempty"`
 

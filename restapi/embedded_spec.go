@@ -222,6 +222,14 @@ func init() {
           "description": "company label",
           "type": "string"
         },
+        "max": {
+          "description": "maximum value of the day",
+          "type": "number"
+        },
+        "min": {
+          "description": "minimum value of the day",
+          "type": "number"
+        },
         "value": {
           "description": "value of the stock company",
           "type": "number"
@@ -457,6 +465,14 @@ func init() {
         "label": {
           "description": "company label",
           "type": "string"
+        },
+        "max": {
+          "description": "maximum value of the day",
+          "type": "number"
+        },
+        "min": {
+          "description": "minimum value of the day",
+          "type": "number"
         },
         "value": {
           "description": "value of the stock company",

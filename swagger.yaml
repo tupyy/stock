@@ -120,6 +120,13 @@ definitions:
       variation:
         type: number
         description: value of the daily variation of the stock value
+      max:
+        type: number
+        description: maximum value of the day
+      min:
+        type: number
+        description: minimum value of the day
+
   stock:
     type: object
     description: list of stock values

@@ -63,6 +63,6 @@ func init() {
 
 	// Cobra supports local flags which will only run when this command
 	// is called directly, e.g.:
-	plotCmd.Flags().IntVarP(&height, "height", "p", 20, "Heigh of the graph")
+	plotCmd.Flags().IntVarP(&height, "height", "p", 20, "Height of the graph")
 	plotCmd.Flags().IntVarP(&width, "width", "w", 100, "Width of the graph")
 }
