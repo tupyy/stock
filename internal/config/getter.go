@@ -14,13 +14,20 @@ const (
 	// base url for stock server (i.e. boursarama)
 	stockServerURL = "stockServerURL"
 
+	// redisURN
 	redisURL = "redisURL"
 
+	// list of companies
 	companies = "companies"
 
+	// crawl period
 	crawlPeriod = "crawlPeriod"
 
+	// if crawlPeriod is not defined, the default period is set to 2s
 	defaultCrawlPeriod = 2 * time.Second
+
+	// useScheduler means that the crawler will crawl only one the stock market is open
+	useScheduler = "useScheduler"
 )
 
 // ParseConfiguration reads the configuration file given as parameter.
@@ -52,6 +59,10 @@ func GetCompanies() []string {
 
 func GetRedisUrl() string {
 	return viper.GetString(redisURL)
+}
+
+func UseScheduler() bool {
+	return viper.GetBool(useScheduler)
 }
 
 func GetCrawlPeriod() time.Duration {

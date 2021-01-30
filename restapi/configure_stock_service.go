@@ -74,13 +74,17 @@ func configureAPI(api *operations.StockServiceAPI) http.Handler {
 	if err != nil {
 		log.Fatal(err)
 	}
+
 	log.Infof("connected to redis %s", config.GetRedisUrl())
 
 	redisRepo := repo.NewStockRedisRepo(rdb)
 	c := crawler.NewCawler(redisRepo)
-	scheduler := crawler.NewScheduler(c)
-	scheduler.Run(ctx)
-	c.Start(ctx)
+	if config.UseScheduler() {
+		scheduler := crawler.NewScheduler(c)
+		scheduler.Run(ctx)
+	} else {
+		c.Start(ctx)
+	}
 
 	if api.GetStockHandler == nil {
 		api.GetStockHandler = operations.GetStockHandlerFunc(func(params operations.GetStockParams) middleware.Responder {
