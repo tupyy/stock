@@ -26,8 +26,7 @@ import (
 //go:generate swagger generate server --target ../../stock-crawler --name StockService --spec ../target/swagger.yaml --principal interface{}
 
 type configurationFlags struct {
-	ConfFile   string `short:"c" long:"conf" description:"Path to configuration file" value-name:"FILE"`
-	OnSchedule bool   `short:"s" long:"on-schedule" description:"Crawl only when the stock is open"`
+	ConfFile string `short:"c" long:"conf" description:"Path to configuration file" value-name:"FILE"`
 }
 
 var confFlags configurationFlags
